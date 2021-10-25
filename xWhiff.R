@@ -50,7 +50,7 @@ draft_league <- draft_league %>%
     pitchcall %in% c("StrikeSwinging", "FoulBall", "InPlay") ~ "Swing"
   ))
 
-# Start to look at the total pitches pitchers have thrown over the couse of the summer
+# Start to look at the total pitches pitchers have thrown over the course of the summer
 pitches_by_pitcher <- draft_league %>%
   group_by(pitcher) %>%
   summarize('total_pitches' = length(taggedpitchtype)) %>%
@@ -179,6 +179,7 @@ plot(fb_bortua)
 print(fb_bortua)
 
 # The variables that are determined important are spinrate, velocity, and vertical break. Tentative attributes are axis and vaa I am going to throw them in 
+# I am still going to include horizontal break as it is still apart of the pitch profile and individual pitch shape
 # Time for train and test split
 set.seed(2021) # Setting the seed helps with reproducing the data
 train_test_split <- function(data, size = 0.6, train = TRUE){
@@ -198,7 +199,7 @@ nrow(fb_profile) * 0.6 #sanity check to make sure the function worked correctly
 # Reason for 60/40 test and train split is the smaller sample size of data working with, better for testing accuracy
 
 # Use random forest model to create xWhiff
-fb_forest_model <- randomForest(whiff_pct ~ avg_velo + avg_spin + avg_vb + avg_vaa + avg_axis,
+fb_forest_model <- randomForest(whiff_pct ~ avg_velo + avg_spin + avg_vb + avg_hb + avg_vaa + avg_axis,
                                 data = fb_train)
 
 summary(fb_forest_model) # Summary of the model
@@ -249,7 +250,7 @@ ggscatter(fb_profile_final, x = "whiff_pct", y = "xWhiff",
 rmse <- (fb_rmse_all)
 std <- (sd(fb_profile$whiff_pct))
 results <- data.frame(fb_rmse = rmse, fb_sd = std)
-view(results) # The RMSE is lower than the SD, that is a win lol
+view(results) # The RMSE is lower than the SD, that is a win lol - definitely need to make improvements 
 
 # Leaderboard for xWhiff
 xWhiff_Leaders <- fb_profile_final %>%
@@ -300,5 +301,5 @@ dbSendQuery(sql_database, "INSERT INTO xwhiff (pitcher, taggedpitchtype, whiff_p
 
 dbReadTable(sql_database, "xwhiff")
 
-
+dbWriteTable(sql_database, "Testing", z_score_pull_power)
 # Soon, import college data for xWhiff
