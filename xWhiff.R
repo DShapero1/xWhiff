@@ -220,27 +220,6 @@ fb_profile_final <- fb_profile %>%
   select(pitcher, taggedpitchtype, whiff_pct, xWhiff) %>%
   arrange(desc(xWhiff))
 
-# Write Results into CSV File
-write.table(fb_profile_final, file = "xWhiff_Results.csv", row.names = F, sep = ",")
-
-mean(fb_profile_final$xWhiff) # The mean value is 25.6%
-
-
-# Create xWhiff Plus 
-# To create plus metrics is the whiff rate divided by the mean whiff rate times 100 - this can be done with xWhiff and Whiff Percentage
-# This is something to come back to, try to see whiff plus across a league wide setting, see who is preforming well and who is not, then look further into pitching metrics
-# Still in the testing phase. 
-test <- fb_profile
-mean(fb_profile_final$xWhiff) # The mean value is 25.6%
-mean(fb_profile_final$whiff_pct) # The mean value is 26.4%
-
-test <- test %>%
-  mutate(whiff_plus = round((whiff_pct / 0.2646566) * 100))
-
-test <- test %>%
-  mutate('xWhiff+' = round((xWhiff / 0.2556566) * 100))
-# Correction I need to take the percentage of whiff across league wide not just fastballs
-
 # Visualize xWhiff to Whiff Percentage
 ggscatter(fb_profile_final, x = "whiff_pct", y = "xWhiff",
           add = "reg.line", cor.coef = TRUE, conf.int = TRUE,
@@ -282,24 +261,3 @@ fb_profile_final$xWhiff_percentile <- round(percentile(fb_profile_final$xWhiff),
 # Next steps are to improve the model, figure out a better method for xWhiff (possibly whiff plus), make MLB comps (to help with MLB comps derive VAA with statcast data using the pitch trajectories or maybe a regression model see what correlates with VAA and use the coefficients?)
 # Another step for the future is xWhiff with the autopitch type and see the xWhiff difference from what the TM tagger thinks the pitch is and what the TM machine thinks the pitch is. 
 # Reason for modeling with FB only is due to the fact in the first half in the Draft League not many pitchers threw enough breaking balls and off speed to qualify 
-
-# Send xWhiff Results to a MySQL database - Example
-library(RMySQL)
-library(DBI)
-
-sql_database <- dbConnect(RMySQL::MySQL(),
-                          dbname = "wvubaseball",
-                          host = "127.0.0.1",
-                          port = 3306,
-                          username = "root",
-                          password = "Miko1499")
-
-dbListTables(sql_database)
-
-dbSendQuery(sql_database, "INSERT INTO xwhiff (pitcher, taggedpitchtype, whiff_pct, xWhiff, whiff_percentile, xWhiff_percentile)
-            VALUES ('Zach Bravo', 'Fastball', 0.076, 0.151, 0.00, 0.00);")
-
-dbReadTable(sql_database, "xwhiff")
-
-dbWriteTable(sql_database, "Testing", z_score_pull_power)
-# Soon, import college data for xWhiff
