@@ -229,7 +229,7 @@ ggscatter(fb_profile_final, x = "whiff_pct", y = "xWhiff",
 rmse <- (fb_rmse_all)
 std <- (sd(fb_profile$whiff_pct))
 results <- data.frame(fb_rmse = rmse, fb_sd = std)
-view(results) # The RMSE is lower than the SD, that is a win lol - definitely need to make improvements 
+view(results) # The RMSE is lower than the SD 
 
 # Leaderboard for xWhiff
 xWhiff_Leaders <- fb_profile_final %>%
